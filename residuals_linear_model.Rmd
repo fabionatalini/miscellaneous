@@ -1,0 +1,77 @@
+---
+title: "Analysis of the residuals of linear models"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Example data
+
+This example is based on a simple regression model using the R built-in dataset "cars", which gives the speed of cars and the distances taken to stop.
+The preliminary plot suggests there is a linear relation between the two variables:
+```{r}
+plot(cars)
+```
+
+## Modelling
+
+Let's do the model:
+```{r}
+mymodel <- lm(dist~speed, data=cars)
+```
+
+The result shows that the variable "speed" is very important:
+```{r}
+summary(mymodel)
+```
+
+## Analysis of the residuals
+
+Residual plots are typically used to find problems with regression. Data  are not good candidates for regression when they are heteroscedastic, dipendent and independent variables are not linearly associated, or thre are outliers.
+
+Firstly, see how the residuals scatter:
+```{r}
+plot(mymodel$residuals,main="Residual plot")
+```
+
+Plot the residuals on the y-axis and the fitted values on the x-axis:
+```{r}
+plot(mymodel$residuals ~ mymodel$fitted.values, xlab="Fitted values", ylab="Residuals", main="Residuals vs. fitted")
+abline(h=0)
+```
+
+Moreover, we can plot the histogram of the residuals to check their normality:
+```{r}
+hist(mymodel$residuals, main="Histogram of residuals", xlab="Residuals")
+```
+
+Similarly to the histogram, we can see the quantile-quantile plot:
+```{r}
+qqnorm(mymodel$residuals)
+qqline(mymodel$residuals)
+```
+
+To check the normality we can also run the Shapiro–Wilk test. The null hypothesis is that the data are normally distributed.
+If the p value is less than the chosen alpha level, then the null hypothesis is rejected and there is evidence that the data are not normally distributed. If the p value is less than the chosen alpha level, you cannot reject the null hypothesis about the normal distribution.
+```{r}
+shapiro.test(mymodel$residuals)
+```
+
+Find out more:
+
+<https://www.statisticshowto.com/residual-plot/>
+
+<http://docs.statwing.com/interpreting-residual-plots-to-improve-your-regression/>
+
+
+
+
+
+
+
+
