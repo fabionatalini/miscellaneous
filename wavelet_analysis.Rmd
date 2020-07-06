@@ -1,0 +1,162 @@
+---
+title: "An application of wavelet analysis"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE,message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this tutorial, we will see how to implement a wavelet analysis. Specifically, we will implement wavelet coherence with three time series, one describing baseline sales, one describing the incremental value of TV marketing, and one describing the incremental value of discounts in stores.
+
+For a background about wavelet analysis, and to interpret the results of the codes in this tutorial, please refer to the documentation [An introduction to wavelets](https://062be51d-e196-4f51-bb0c-5054f07d8671.filesusr.com/ugd/c0ece9_fb88ce51750645acabbb6f58fac448fb.pdf).
+
+To perform the wavelet analysis, We will use the `biwavelet` package:
+
+```{r, eval=TRUE, echo=TRUE,message=FALSE, warning=FALSE,results='hide'}
+library(biwavelet)
+```
+```{r, eval=TRUE, echo=TRUE}
+print(packageDescription("biwavelet"))
+```
+
+## Data preparation
+
+First, read in the data:
+
+```{r, eval=TRUE, echo=FALSE,message=FALSE, warning=FALSE,results='hide'}
+setwd("Z:/Metrix/COMUN/Analisis/Clientes/Ebro Foods/2020/Modelización/Brillante/Vasitos/pruebas_wavelet_ebro")
+library(kableExtra)
+```
+```{r, eval=TRUE, echo=FALSE}
+datos <- read.table("Libro2.txt",header=TRUE,stringsAsFactors=FALSE,sep="\t")
+datos$fecha <- as.Date(datos$fecha,"%d/%m/%Y")
+
+datos %>% kable() %>% kable_styling() %>% scroll_box(height="500px",width="100%")
+```
+Let's plot the data and study the trends by fitting a smoothing line. We will use a different spline curve for each series:
+
+```{r, eval=TRUE, echo=TRUE, fig.width = 12}
+# make the names easier
+x <- datos$fecha
+y <- datos$Baseline
+z <- datos$AporteTV
+w <- datos$AportePromo
+
+# fit the smoothing lines
+smooth1 <- smooth.spline(x, y,all.knots=FALSE,nknots=10)
+smooth2 <- smooth.spline(x, z,all.knots=FALSE,nknots=5)
+smooth3 <- smooth.spline(x, w,all.knots=FALSE,nknots=5)
+
+par(mar=c(5,4,4,5),mfrow=c(1,2))
+# plot 1
+plot(x,y,type='l',col="brown",ylab="Baseline sales",xlab="")
+lines(smooth1, col='red', lwd=2)
+par(new=TRUE)
+plot(x,z,type='l',col='blue',yaxt='n',xaxt='n',ylab='',xlab='')
+lines(smooth2, col='red', lwd=2)
+axis(4)
+mtext('TV incremental value',side=4,line=3) 
+legend("topleft",col=c("brown","blue"),lty=1,legend=c("Baseline","TV"))
+
+# plot 2
+plot(x,y,type='l',col="brown",ylab="Baseline sales",xlab="")
+lines(smooth1, col='red', lwd=2)
+par(new=TRUE)
+plot(x,w,type='l',col='blue',yaxt='n',xaxt='n',ylab='',xlab='')
+lines(smooth3, col='red', lwd=2)
+axis(4)
+mtext('Discount incremental value',side=4,line=3) 
+legend("topleft",col=c("brown","blue"),lty=1,legend=c("Baseline","Discount"))
+```
+
+The splines describe the mid/long-term trends of the original data. The series of the baseline sales and the series of the discount incremental value are quite synchronous. On the other hand, the synchrony bwtween the baseline and the TV incremental values is unclear. In fact, between the 2016 and the mid-2017, the increase of the baseline seems to follow - to some extent - the increase of the TV. This could suggest a sustained effect of the TV on the oncoming baseline. To check this, the wavelet coherence can come in handy.
+
+## Wavelet coherence
+
+First, scale the data to a mean of zero and a standard deviation of 1. Then let's prepare three datasets, one for each time series:
+
+```{r, eval=TRUE, echo=TRUE}
+datos$Baseline <- c(scale(datos$Baseline))
+datos$AporteTV <- c(scale(datos$AporteTV))
+datos$AportePromo <- c(scale(datos$AportePromo))
+
+baseline <- datos[,c("fecha","Baseline")]
+TV <- datos[,c("fecha","AporteTV")]
+Promo <- datos[,c("fecha","AportePromo")]
+```
+
+Now let's compute and plot the wavelet coherence:
+
+```{r, eval=TRUE, echo=TRUE, results='hide', fig.width = 12}
+coher.baselineTV <- wtc(TV,baseline)
+coher.baselinePromo <- wtc(Promo,baseline)
+
+par(mfrow=c(1,2))
+
+plot(coher.baselineTV, plot.cb=FALSE,plot.phase=TRUE)
+title('baseline vs. TV')
+
+plot(coher.baselinePromo, plot.cb=FALSE,plot.phase=TRUE)
+title('baseline vs. Promo')
+```
+
+The wavelet coherence indicates a common signal at the low-frequency (period 15-30) between the time series of the baseline sales and the time series of the TV incremental value. The black rows pointing up and up/right indicate that the response series (the baseline in our case) leads the other series; again see the documentation [An introduction to wavelets](https://062be51d-e196-4f51-bb0c-5054f07d8671.filesusr.com/ugd/c0ece9_fb88ce51750645acabbb6f58fac448fb.pdf) to understand this.
+This result supports our hypothesis about a relationship between the two series.
+
+
+## The problem of autocorrelation
+
+Time series usually present autocorrelation, i.e. serial correlation, and this violates the assumptions of many inference tests. For example, the significance of correlation coefficients is tested using a t statistic which operates in the same way as other t tests (Holmes et al., 2017). When two time series are autocorrellated and the correlation coefficient between them is tested, the number of the degrees of freedom is different from the assumed one (see e.g. Pyper and Peterman, 1998). Therefore, we may worry about the significance of the wavelet coherence when the time series are autocorrelated.
+
+To address this problem, an approach is prewhitening, i.e. removing the autocorrelation. This means fitting a time series model, such as autoregressive model or autoregressive moving average, to an original time series and separating out the time series of residuals from the original series, which becomes the prewhitened series (Razavi and Vogel, 2018). This new series inherits the properties of the original series except for the persistence over successive time lags, so it finally resembles a white noise.  
+For example, let's see an approach implemented in the dplR package (Bunn, 2008; in this example the Akaike Information Criterion is used to choose the order of the autoregressive model, and the Yule-Walker equation is used to estimate the coefficients of the model):
+
+```{r, eval=TRUE, echo=TRUE, fig.width = 12}
+# prewhitening the baseline series
+ar1 <- ar(datos$Baseline, aic=TRUE, method ="yule-walker")
+prewh <- ar1$resid + ar1$x.mean
+
+print(paste("The order of the fitted AR model is:",ar1$order))
+
+# Now plot the autocorrelation of both original and prewhitened baseline sales
+par(mar=c(5,4,4,2),cex.main=0.9,mfrow=c(1,2))
+acf(datos$Baseline,main="Autocorrelation of the original baseline series")
+prewh[is.na(prewh)] <- 0
+acf(prewh,main="Autocorrelation of the prewhitened baseline series")
+```
+
+The autocorrelation has largely gone, and now we could feel more comfortable to compute the wavelet coherence.
+
+However, prewhitening can have some disadvantage. It is important to evaluate whether the prewhitened series still carries the information of interest embedded in the original time series, specifically when we are interested in signals at some specific range of frequencies (i.e. time scales) (Razavi and Vogel, 2018). In fact, founding the analysis on prewhitened series can be misleading, because prewhitening can alter or remove the structure of variability across time scales, and especially on low frequencies (Razavi and Vogel, 2018). Therefore, the information given by the long-term trends of time seires can be lost when prewhitening is applied.
+
+In the example above, the order of the fitted AR model is 4, i.e the persistence on a time lag of 4 has been removed. In fact, some useful information may have been lost. Recall that we are dealing with sales: the effect of something occurring today in the market may last for some time in the future. Our data are weekly, and sales of the current week can exhibit a strong correlation with sales of four weeks ago because of some underlying market dynamic that is in fact important in our analysis. Let’s compare the original baseline series with the prewhitened one:
+
+```{r, eval=TRUE, echo=TRUE, fig.width = 12}
+par(mar=c(5,4,4,2),cex.main=0.9,mfrow=c(1,2))
+plot(datos$fecha,datos$Baseline,type='l',col="brown",ylab="Baseline sales",xlab="",main="Original baseline series")
+plot(datos$fecha,prewh,type='l',col="brown",ylab="Baseline sales",xlab="",main="Prewhitened baseline series")
+```
+
+The original long-term trend has gone. Although now we have a stationary series, we may have lost some important property of the data.
+
+Furthermore, the computation of wavelet coherence in the biwavelet package considers the existence of autocorrelation in the data. Grinsted et al. (2004) give a description of wavelet coherence, with an application to geophysical time series. The authors explain that the null hypotheses to test the statistical significance of wavelet power is that the signal is generated by a stationary process. According to the authors, many geophysical time series have red noise characteristics that can be modelled with a first-order autoregressive model. Their approach to wavelet coherence, implemented in the biwavelet package, include some statistical methods accounting for this kind of autocorrelation in the data (for details see Grinsted et al., 2004). Therefore, the problem of autocorrelation is in fact addressed in the biwavelet package, and we should not have any big concern when implementing it in our analyses.
+
+Last but not least, assuring that the results of an analysis make sense is still up to the analyst. Removing the autocorrelation from a time series can be formally right, but some important information could be lost, so the analyst should think whether autocorrelation should be removed, and to which degree in that case.
+
+## References
+
+Bunn A.G., 2008. A dendrochronology program library in R (dplR). Dendrochronologia, 26(2), 115-124
+
+Grinsted A., Moore J.C., Jevrejeva S., 2004. Application of the cross wavelet transform and wavelet coherence to geophysical time series. Nonlinear Processes in Geophysics, European Geosciences Union (EGU), 2004, 11 (5/6), pp.561-566 [HAL Id: hal-00302394](https://hal.archives-ouvertes.fr/hal-00302394)
+
+Holmes A., Illowsky B., Dean S., 2017. Introductory Business Statistics. Rice University, [OpenStax](https://openstax.org/details/books/introductory-business-statistics).
+
+Pyper B.J., Peterman R.M., 1998. Comparison of methods to account for autocorrelation in correlation analyses of fish data. Canadian Journal of Fisheries and Aquatic Sciences, 55(9), 2127-2140
+
+Razavi S., Vogel R., 2018. Prewhitening of hydroclimatic time series? Implications for inferred change and variability across time scales. Journal of hydrology, 557, 109-115
+
+
+
