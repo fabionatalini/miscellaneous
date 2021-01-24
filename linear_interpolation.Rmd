@@ -1,0 +1,66 @@
+---
+title: "Linear interpolation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Interpolation function: definition
+
+From the R documentation
+```{r, eval=FALSE, echo=TRUE}
+help(approx)
+```
+**approx(x, y=NULL, xout, method="linear", n=50, rule = 1)**  
+
+**x, y**	vectors giving the coordinates of the points to be interpolated  
+
+**xout**	an optional set of values specifying where interpolation is to take place  
+
+**n**	If xout is not specified, interpolation takes place at n equally spaced points spanning the interval [min(x), max(x)]  
+
+**rule**	an integer describing how interpolation is to take place outside the interval [min(x), max(x)]. If rule is 1 then NAs are returned for such points and if it is 2, the value at the closest data extreme is used
+
+## Using "n"
+
+```{r, eval=TRUE, echo=TRUE}
+a <- seq(-4,5,by=1)
+
+f <- function(x){(x^2)-x}
+
+parabola <- f(a)
+
+par(mfrow=c(2,2))
+
+for(i in c(10,20,30,40)){
+  plot(parabola,xaxt='n',pch=19,col="black",xlab="",main=paste0("n=",i))
+  axis(1,at=c(1:length(a)),labels=a)
+  points(approx(parabola,n=i),pch=22,col="red")
+}
+```
+
+## Using "xout"
+
+```{r, eval=TRUE, echo=TRUE}
+abscissa <- c(-1,length(a)+2)
+abscissa_points <- seq(-1,length(a)+2,by=1)
+abscissa_labels <- seq(min(a)-2,max(a)+2,by=1)
+ordinate <- c(min(parabola),max(parabola)+3)
+
+plot(parabola,pch=19,col="black",xaxt="n", xlim=abscissa, ylim=ordinate, xlab="",main="xout=abscissa_points")
+axis(1, at=abscissa_points, labels=abscissa_labels)
+points(approx(parabola,xout=abscissa_points),pch=22,col="red")
+
+par(mfrow=c(1,2))
+
+begin <- abscissa_points[1]-1
+finish <- abscissa_points[length(abscissa_points)]+1
+
+for(set_rule in c(1,2)){
+  plot(parabola,pch=19,col="black",xaxt="n", xlim=abscissa, ylim=ordinate, xlab="",main=paste0("outside the x range, rule=",set_rule))
+  axis(1, at=abscissa_points, labels=abscissa_labels)
+  points(approx(parabola,xout=seq(begin,finish,by=1),rule=set_rule),pch=22,col="red")
+}
+```
