@@ -2,8 +2,8 @@ library(shiny)
 library(rgdal)
 
 my_spdf <- readOGR(
-    dsn <- "C:/Users/fabnatal/Documents/TRABAJO EN LOCAL/ebro_map/ebro_map/shapefiles",
-    layer <- "recintos_autonomicas_inspire_peninbal_etrs89",
+    dsn="C:/Users/fabnatal/Documents/TRABAJO EN LOCAL/ebro_map/ebro_map/shapefiles",
+    layer="recintos_autonomicas_inspire_peninbal_etrs89",
     verbose=FALSE
 )
 
