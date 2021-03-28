@@ -148,7 +148,6 @@ def recursive_split(node, max_depth, min_size, depth):
     left, right = node['groups']
     del(node['groups'])
     # check if there is a missing group
-    # although this should never occur because row[index] < value in test_split
     if not left or not right:
         node['left'] = node['right'] = probabilita_1(left + right)
         return
@@ -248,7 +247,7 @@ def pronostico(decisioni, row):
 			return decisioni['right']
 
 """
-# examples
+############################ example ############################
 import matplotlib.pyplot as plt
 
 def esempi(z):
@@ -256,12 +255,11 @@ def esempi(z):
     y=[row[1] for row in z]
     labels=[row[2] for row in z]
     plt.scatter(x, y, c=labels)
-    for i in range(len(dati)):
+    for i in range(len(z)):
         plt.text(z[i][0], z[i][1], str(i))
     plt.show()
     return albero(z, 1, 1)
 
-#example 1
 dati = [[2.771244718,1.784783929,0],
         [1.728571309,1.169761413,0],
         [3.678319846,2.81281357,0],
@@ -279,7 +277,7 @@ for row in dati:
 	prediction = pronostico(modello, row)
 	print('Expected=%d, Got=%s' % (row[-1], round(prediction,3)))
 
-#example 2
+############################ example ############################
 dati[9][2]=0
 modello=esempi(dati)
 print(modello)
@@ -287,7 +285,7 @@ for row in dati:
 	prediction = pronostico(modello, row)
 	print('Expected=%d, Got=%s' % (row[-1], round(prediction,3)))
 
-#example 3
+############################ example ############################
 dati[0][2]=1
 modello=esempi(dati)
 print(modello)
@@ -295,11 +293,63 @@ for row in dati:
 	prediction = pronostico(modello, row)
 	print('Expected=%d, Got=%s' % (row[-1], round(prediction,3)))
 
-#example 4
+############################ example ############################
 dati[1][2]=1
 modello=esempi(dati)
 print(modello)
 for row in dati:
 	prediction = pronostico(modello, row)
 	print('Expected=%d, Got=%s' % (row[-1], round(prediction,3)))
+
+############################ example ############################
+import csv
+import matplotlib.pyplot as plt
+import pprint
+
+#example data
+[[1.0, 11.0, 1.0],
+ [3.5, 12.0, 1.0],
+ [5.0, 10.5, 1.0],
+ [3.5, 9.0, 1.0],
+ [2.0, 7.5, 1.0],
+ [5.0, 7.5, 1.0],
+ [1.0, 5.0, 0.0],
+ [4.5, 5.0, 0.0],
+ [2.0, 3.0, 0.0],
+ [4.0, 2.5, 0.0],
+ [2.5, 2.0, 0.0],
+ [5.0, 1.0, 0.0],
+ [7.5, 12.0, 0.0],
+ [7.5, 9.0, 0.0],
+ [10.5, 10.0, 1.0],
+ [10.0, 7.5, 0.0],
+ [11.5, 11.0, 0.0],
+ [11.5, 9.0, 0.0],
+ [6.5, 5.0, 0.0],
+ [8.0, 2.5, 0.0],
+ [11.0, 3.5, 1.0],
+ [14.0, 5.5, 0.0],
+ [13.0, 2.0, 0.0]]
+
+path_file = "/home/fabio/Documents/alberi/example_data.txt"
+
+dataset=list()
+with(open(path_file, mode="rt")) as input_stuff:
+    foo = csv.reader(input_stuff,delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
+    for row in foo:
+        dataset.append(row)
+    input_stuff.close()
+del(foo,input_stuff,row,path_file)
+
+def esempi(z, max_tree_depth, min_node_size):
+    x=[row[0] for row in z]
+    y=[row[1] for row in z]
+    labels=[row[2] for row in z]
+    plt.scatter(x, y, c=labels)
+    for i in range(len(z)):
+        plt.text(z[i][0], z[i][1], str(i))
+    plt.show()
+    return albero(z, max_tree_depth, min_node_size)
+
+pprint.pprint(esempi(z=dataset,max_tree_depth=2,min_node_size=1))
 """
