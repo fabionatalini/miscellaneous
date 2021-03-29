@@ -352,4 +352,34 @@ def esempi(z, max_tree_depth, min_node_size):
     return albero(z, max_tree_depth, min_node_size)
 
 pprint.pprint(esempi(z=dataset,max_tree_depth=2,min_node_size=1))
+
+############################ example ############################
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+
+datos=[[1,1,1,1],
+[2,2,2,1],
+[4,1,1,1],
+[5,2,2,1],
+[1,4,1,1],
+[2,5,2,1],
+[4,4,1,1],
+[5,5,2,1],
+[5,5,5,0],
+[4,4,4,0],
+[1,5,5,0],
+[2,4,4,0],
+[5,1,5,1],
+[4,2,4,1],
+[1,1,4,1],
+[2,2,5,1]]
+
+x=[row[0] for row in datos]
+y=[row[1] for row in datos]
+z=[row[2] for row in datos]
+
+fig = plt.figure()
+ax = plt.axes(projection="3d")
+ax.scatter3D(x, y, z)
+plt.show()
 """
