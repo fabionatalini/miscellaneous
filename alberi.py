@@ -382,4 +382,56 @@ fig = plt.figure()
 ax = plt.axes(projection="3d")
 ax.scatter3D(x, y, z)
 plt.show()
+
+############################ example ############################
+import matplotlib.pyplot as plt
+
+datos=[[1,1,1,1],
+[2,2,2,1],
+[4,1,1,1],
+[5,2,2,1],
+[1,4,1,1],
+[2,5,2,1],
+[4,4,1,1],
+[5,5,2,1],
+[5,5,5,0],
+[4,4,4,0],
+[1,5,5,0],
+[2,4,4,0],
+[5,1,5,1],
+[4,2,4,1],
+[1,1,4,1],
+[2,2,5,1]]
+
+#add markers of the 3d groups
+#recursive creation of indexes
+def add_2(n,end,lista):
+    if n+2 > end:
+        return
+    else:
+        lista.append(n+2)
+        add_2(n+2,end,lista)
+
+iii=list()
+add_2(-2,14,iii)
+jjj=list()
+add_2(0,16,jjj)
+
+for item in range(len(iii)):
+    a, b = iii[item], jjj[item]
+    for row in datos[a:b]:
+        row.append(item)
+
+fig = plt.figure()
+ax = fig.add_subplot(projection='3d')
+
+x=[row[0] for row in datos]
+y=[row[1] for row in datos]
+z=[row[2] for row in datos]
+labels=[row[3] for row in datos]
+
+ax.scatter(x, y, z, c=labels)
+for i in range(len(datos)):
+        ax.text(datos[i][0], datos[i][1], datos[i][2], str(datos[i][4]))
+plt.show()
 """
