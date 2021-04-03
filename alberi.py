@@ -354,56 +354,30 @@ def esempi(z, max_tree_depth, min_node_size):
 pprint.pprint(esempi(z=dataset,max_tree_depth=2,min_node_size=1))
 
 ############################ example ############################
-from mpl_toolkits import mplot3d
+#store initial variables to clean later
+not_my_variables = set(dir())
+
 import matplotlib.pyplot as plt
 
 datos=[[1,1,1,1],
 [2,2,2,1],
 [4,1,1,1],
 [5,2,2,1],
-[1,4,1,1],
-[2,5,2,1],
-[4,4,1,1],
-[5,5,2,1],
+[1,1,4,1],
+[2,2,5,1],
+[4,1,4,1],
+[5,2,5,1],
 [5,5,5,0],
 [4,4,4,0],
-[1,5,5,0],
-[2,4,4,0],
-[5,1,5,1],
-[4,2,4,1],
-[1,1,4,1],
-[2,2,5,1]]
-
-x=[row[0] for row in datos]
-y=[row[1] for row in datos]
-z=[row[2] for row in datos]
-
-fig = plt.figure()
-ax = plt.axes(projection="3d")
-ax.scatter3D(x, y, z)
-plt.show()
-
-############################ example ############################
-import matplotlib.pyplot as plt
-
-datos=[[1,1,1,1],
-[2,2,2,1],
-[4,1,1,1],
-[5,2,2,1],
-[1,4,1,1],
-[2,5,2,1],
-[4,4,1,1],
+[1,4,4,0],
+[2,5,5,0],
 [5,5,2,1],
-[5,5,5,0],
-[4,4,4,0],
-[1,5,5,0],
-[2,4,4,0],
-[5,1,5,1],
-[4,2,4,1],
-[1,1,4,1],
-[2,2,5,1]]
+[4,4,1,0],
+[2,5,2,1],
+[1,4,1,1]]
 
-#add markers of the 3d groups
+#plot data with grouping markers
+#first, add grouping markers
 #recursive creation of indexes
 def add_2(n,end,lista):
     if n+2 > end:
@@ -417,11 +391,13 @@ add_2(-2,14,iii)
 jjj=list()
 add_2(0,16,jjj)
 
+#add the grouping markers
 for item in range(len(iii)):
     a, b = iii[item], jjj[item]
     for row in datos[a:b]:
         row.append(item)
-
+        
+#plot the data points with class labels and grouping markers
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
@@ -432,6 +408,21 @@ labels=[row[3] for row in datos]
 
 ax.scatter(x, y, z, c=labels)
 for i in range(len(datos)):
-        ax.text(datos[i][0], datos[i][1], datos[i][2], str(datos[i][4]))
+    ticket='%s, [%s,%s,%s]' % (datos[i][4], datos[i][0], datos[i][1], datos[i][2])
+    ax.text(datos[i][0], datos[i][1], datos[i][2], ticket, fontsize=7.5)
 plt.show()
+
+#restore data without the grouping markers
+for row in range(len(datos)):
+    datos[row]=datos[row][0:4]
+    
+#clean variables
+my_variables = set(dir()) - not_my_variables
+for i in my_variables:
+    if i not in ["datos"]:
+        del(globals()[i])
+del(i,my_variables)
+
+import pprint
+pprint.pprint(albero(train_data=datos, max_depth=3, min_size=1))
 """
