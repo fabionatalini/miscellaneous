@@ -108,3 +108,4 @@ def pronostico(decisioni, row):
 			return pronostico(decisioni['right'], row)
 		else:
 			return decisioni['right']
+
