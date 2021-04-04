@@ -1,3 +1,13 @@
+import os
+import requests
+path="/home/fabio/Documents/alberi"
+url="https://raw.githubusercontent.com/fabionatalini/miscellaneous/master/alberi/ppp.py"
+r = requests.get(url)
+open(path+"/myfile4.py", 'wb').write(r.content)
+
+command="python %s/myfile4.py" % path
+os.system(command)
+
 ############### calculate the gini index #######################
 gruppi=(
       [[2.771244718,1.784783929,1],
