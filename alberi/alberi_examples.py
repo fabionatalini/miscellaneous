@@ -1,12 +1,22 @@
+############### get the scripts and data form github #######################
 import os
 import requests
-path="/home/fabio/Documents/alberi"
-url="https://raw.githubusercontent.com/fabionatalini/miscellaneous/master/alberi/ppp.py"
-r = requests.get(url)
-open(path+"/myfile4.py", 'wb').write(r.content)
 
-command="python %s/myfile4.py" % path
+files_to_download=["alberi.py","alberi_examples.py","data_banknote_authentication.csv","example_data.txt"]
+local_path="C:/Users/fabnatal/Documents/Python Scripts/Nueva carpeta/"
+url="https://raw.githubusercontent.com/fabionatalini/miscellaneous/master/alberi/"
+
+for fichero in files_to_download:
+    r=requests.get(url+fichero)
+    f=open(local_path+fichero, 'wb')
+    f.write(r.content)
+    f.close()
+
+print(os.listdir(local_path))
+
+command="python %salberi.py" % local_path
 os.system(command)
+
 
 ############### calculate the gini index #######################
 gruppi=(
@@ -302,4 +312,23 @@ newdata=[[1.5,1.5,1.5,1],
 
 for i in newdata:
     print(pronostico(mymodel,i))
+    
+
+############### example with data_banknote_authentication #######################
+import csv
+
+path_file="C:/Users/fabnatal/Documents/Python Scripts/Nueva carpeta/data_banknote_authentication.csv"
+
+f=open(path_file, mode="rt")
+r=csv.reader(f,delimiter=",", quoting=csv.QUOTE_NONNUMERIC)
+
+dataset=list()
+for row in r:
+    dataset+=[row]
+    del(row)
+f.close()
+
+import pprint
+pprint.pprint(albero(train_data=dataset, max_depth=3, min_size=1))
+
 
