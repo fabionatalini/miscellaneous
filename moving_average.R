@@ -1,5 +1,5 @@
 ################### moving average using stats::filter #######################
-# this is a centered moving average
+# this is a centered moving average (sides=2, see help(filter))
 ma <- function(x,n=5){stats::filter(x, rep(1 / n, n), method="convolution", sides=2)}
 
 datos <- mtcars$mpg
