@@ -26,7 +26,7 @@ x[5]*coef1+x[6]*coef2
 ################### moving average using loops #######################
 # note: this is not a centered moving average
 # it is build upon the last number of the window
-movAvg <- function(x,width,inputConstant=FALSE){
+movAvg <- function(x,width,inputConstant=c("0","1st")){
   lx <- length(x)
   result <- c()
   while(TRUE){
@@ -36,17 +36,26 @@ movAvg <- function(x,width,inputConstant=FALSE){
     x <- head(x,-1)
   }
   result <- rev(result)
-  if(inputConstant){
+  if(inputConstant=="0"){
+    lxr <- lx-length(result)
+    if(lxr>0){
+      result <- c(rep(0,lxr),result)
+    }
+  } else if (inputConstant=="1st"){
     lxr <- lx-length(result)
     if(lxr>0){
       result <- c(rep(result[1],lxr),result)
     }
-  }
+  } else {stop("inputConstant must be a string '0' or '1st'")}
   return(result)
 }
 
-mediamovil <- movAvg(datos, 5, inputConstant=TRUE)
+mediamovil <- movAvg(mtcars$mpg, 5, inputConstant="0")
+matplot(data.frame(mtcars$mpg, mediamovil), type="l")
 
-matplot(data.frame(datos, mediamovil), type="l")
+mediamovil <- movAvg(mtcars$mpg, 5, inputConstant="1st")
+matplot(data.frame(mtcars$mpg, mediamovil), type="l")
+
+mediamovil <- movAvg(mtcars$mpg, 5, inputConstant="foo")
 
 
