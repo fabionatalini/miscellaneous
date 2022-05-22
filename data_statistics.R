@@ -29,6 +29,5 @@ data_statistics <- function(x){
      "skewness_median"=(3*(mu-mn))/sigma))
 }
 
-trial_data <- cbind(mtcars, "colWithNAs"=c(sample(nrow(mtcars)-5),rep(NA,5)))
-
-apply(trial_data,MARGIN = 2,FUN = data_statistics)
+#trial_data <- cbind(mtcars, "colWithNAs"=c(sample(nrow(mtcars)-5),rep(NA,5)))
+#apply(trial_data,MARGIN = 2,FUN = data_statistics)
