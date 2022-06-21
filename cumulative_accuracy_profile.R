@@ -1,4 +1,4 @@
-cap_lift <- function(predictions,name_target,name_scores,quantiles){
+cap_lift <- function(predictions,quantiles){
   #========================================================#
   # predictions es un data.frame con dos columnas: 
   # la primera columna con la respuesta real,
