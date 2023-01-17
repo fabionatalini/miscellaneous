@@ -1,0 +1,68 @@
+---
+title: "Principal Component Analysis"
+author: "Fabio Natalini"
+date: "2023-01-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+suppressWarnings(suppressPackageStartupMessages(library(knitr)))
+suppressWarnings(suppressPackageStartupMessages(library(kableExtra)))
+```
+
+## Random data set
+
+First, let’s generate a data set with continuous variables. We will make *ad-hoc* variables to make our example straightforward. 
+
+```{r}
+n <- 300
+lapply(c(9,18,27), function(x){
+  set.seed(1)
+  cbind(
+    rnorm(n,mean=x-1,sd=1),
+    rnorm(n,mean=x,sd=1),
+    rnorm(n,mean=x+1,sd=1)
+  ) |> as.data.frame() |> setNames(nm=paste0("_",x,c("minus","norm","plus")))
+}) |> do.call(what=cbind) -> data.set
+```
+
+```{r}
+data.set %>% kable(row.names = TRUE) %>%
+  kable_styling("basic",full_width = FALSE) %>%
+  scroll_box(height = "200px")
+```
+<br>
+```{r}
+par(xpd=TRUE,mar=c(1,1,1,8),cex=0.8)
+matplot(data.set,type="l",col=rainbow(ncol(data.set)),ylab="",xlab="",xaxt="n",yaxt="n")
+legend("topright", inset=c(-0.22, 0),lty=1,legend=names(data.set),col=rainbow(ncol(data.set)))
+```
+
+The variables are clearly grouped. This should lead to clear results.
+
+## PCA
+
+We will use the function `princomp` to perform a principal component analysis. Then we will examine the proportion of variance explained by each component, the scree plot of the eigenvalues and the component matrix graph.
+
+```{r}
+data.pca <- princomp(data.set)
+summary(data.pca) #Proportions of Variance
+plot(data.pca,type='l',main='scree plot') #scree plot of eigenvalues
+biplot(data.pca) #plot the component matrix graph
+```
+
+The results shows that there are 3 important components. Let’s take them and plot the loadings against the original variables.
+
+```{r}
+main.comp <- data.pca$loadings[,1:3]
+# data.pca$scores[,1:3] #these are the scores of the first components 
+
+par(mfrow=c(3,1),cex.axis=0.9,cex.main=0.9,las=2,mar=c(1,4,2,1))
+barplot(unname(main.comp[,1]),main="Comp.1",ylab="loadings")
+barplot(unname(main.comp[,2]),main="Comp.2",ylab="loadings")
+par(mar=c(5,4,2,1))
+barplot(main.comp[,3],main="Comp.3",ylab="loadings")
+```
+
+The 3 selected components indicate the underlying grouping we expected.
