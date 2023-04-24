@@ -39,3 +39,6 @@ ku(data.t)
 moments::skewness(data.t)
 sk(data.t)
 
+#Compared to a normal distribution, the Student’s t distribution presents a greater area in the tails and a smaller area in the center.
+#In the example, the kurtosis is greater than 3, confirming that the distribution has more values in the tails compared to a normal distribution.
+
