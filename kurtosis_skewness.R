@@ -1,16 +1,20 @@
 library(moments)
 
+# Kurtosis
 ku <- function(x) {
   return(sum(
     ( ((x-mean(x))^4) / length(x) ) / (sd(x))^4
   ))
 }
 
+# Fisher-Pearson coefficient of skewness
 sk <- function(x) {
   return(sum(
     ( ((x-mean(x))^3) / length(x) ) / (sd(x))^3
   ))
 }
+
+# https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm
 
 set.seed(1)
 data.n <- rnorm(1000)
